@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>测测你是哪种共情小动物</title>
+<meta name="description" content="12 道题，测出你的共情类型：你是吸收所有情绪的小羊，还是一眼看穿气氛的小鹿？">
+<style>
+  :root {
+    --bg: #fbf6ef;
+    --card: #ffffff;
+    --ink: #2d2a32;
+    --muted: #8a8290;
+    --line: #eee6dc;
+    --accent: #e8836b;
+    --accent-soft: #fbe6df;
+    --radius: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    color: var(--ink);
+    line-height: 1.7;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 24px 18px 48px; }
+  .screen { display: none; animation: fade .35s ease; }
+  .screen.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* 首页 */
+  .hero { text-align: center; padding: 36px 8px 8px; }
+  .hero .animals { font-size: 40px; letter-spacing: 6px; margin-bottom: 18px; }
+  .hero h1 { font-size: 28px; line-height: 1.35; font-weight: 800; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { color: var(--muted); margin-top: 12px; font-size: 15px; }
+  .meta { display: flex; justify-content: center; gap: 10px; margin: 22px 0 30px; flex-wrap: wrap; }
+  .meta span { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-size: 13px; color: var(--muted); }
+  .btn {
+    display: block; width: 100%; border: 0; border-radius: 999px;
+    background: var(--accent); color: #fff; font-size: 17px; font-weight: 700;
+    padding: 15px 0; cursor: pointer; font-family: inherit;
+    box-shadow: 0 6px 18px rgba(232,131,107,.35);
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: transparent; color: var(--muted); box-shadow: none; font-weight: 500; font-size: 15px; }
+  .note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 18px; }
+
+  /* 答题 */
+  .bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
+  .qtop { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 22px; font-size: 13px; color: var(--muted); }
+  .qtop button { background: none; border: 0; color: var(--muted); font-size: 13px; font-family: inherit; cursor: pointer; }
+  .qtop button:disabled { visibility: hidden; }
+  .qtitle { font-size: 21px; font-weight: 700; line-height: 1.5; margin-bottom: 22px; }
+  .opt {
+    display: block; width: 100%; text-align: left; font-family: inherit;
+    background: var(--card); border: 1.5px solid var(--line); border-radius: 16px;
+    padding: 15px 16px; margin-bottom: 12px; font-size: 16px; color: var(--ink);
+    cursor: pointer; line-height: 1.55; transition: border-color .15s, background .15s;
+  }
+  .opt:active, .opt.picked { border-color: var(--accent); background: var(--accent-soft); }
+
+  /* 分析中 */
+  .loading { text-align: center; padding-top: 30vh; }
+  .loading .spin { font-size: 44px; display: inline-block; animation: bob 1s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-10px); } }
+  .loading p { color: var(--muted); margin-top: 16px; }
+
+  /* 结果 */
+  .rcard { background: var(--card); border-radius: var(--radius); padding: 28px 22px 24px; text-align: center; border: 1px solid var(--line); }
+  .rcard .tag { font-size: 13px; color: var(--muted); }
+  .rcard .big { font-size: 76px; line-height: 1.1; margin: 10px 0 6px; }
+  .rcard h2 { font-size: 26px; font-weight: 800; }
+  .rcard .type { display: inline-block; margin-top: 6px; padding: 2px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .rcard .line1 { font-size: 17px; font-weight: 600; margin-top: 16px; line-height: 1.6; }
+  .rcard .tags { margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .rcard .brand { margin-top: 18px; font-size: 11px; color: #bdb5c2; letter-spacing: 1px; }
+  .shot { text-align: center; font-size: 12px; color: var(--muted); margin: 10px 0 22px; }
+
+  .sec { background: var(--card); border-radius: var(--radius); padding: 20px 20px 18px; margin-bottom: 14px; border: 1px solid var(--line); }
+  .sec h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+  .sec p { font-size: 15px; }
+  .sec ol { padding-left: 0; list-style: none; counter-reset: n; }
+  .sec ol li { counter-increment: n; position: relative; padding-left: 30px; margin-bottom: 12px; font-size: 15px; }
+  .sec ol li::before {
+    content: counter(n); position: absolute; left: 0; top: 2px; width: 21px; height: 21px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 800; text-align: center; line-height: 21px;
+  }
+  .sec ol li b { display: block; }
+  .src { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .dist .row { display: flex; align-items: center; gap: 10px; margin: 9px 0; font-size: 14px; }
+  .dist .row .nm { width: 74px; flex: none; }
+  .dist .row .tr { flex: 1; height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .dist .row .tr i { display: block; height: 100%; border-radius: 99px; }
+  .dist .row .pc { width: 38px; text-align: right; color: var(--muted); font-size: 13px; flex: none; }
+
+  .quote { font-size: 15px; line-height: 1.8; }
+  .quote::before { content: "“"; font-size: 36px; color: var(--accent); line-height: 0; vertical-align: -14px; margin-right: 2px; }
+
+  .pair { display: flex; gap: 10px; }
+  .pair div { flex: 1; background: var(--bg); border-radius: 14px; padding: 12px; font-size: 14px; }
+  .pair div b { display: block; font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+
+  .disclaimer { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 18px 4px 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="screen on" id="s-intro">
+    <div class="hero">
+      <div class="animals">🐑🦌🐘🦉🦔</div>
+      <h1>测测你是哪种<br><em>共情小动物</em></h1>
+      <p>你总能感受到别人的情绪吗？<br>这份「感受力」，是你的超能力，还是你内耗的来源？</p>
+    </div>
+    <div class="meta"><span>12 道题</span><span>约 3 分钟</span><span>5 种结果</span></div>
+    <button class="btn" onclick="start()">开始测试</button>
+    <p class="note">凭第一感觉选，不用想太久哦</p>
+  </section>
+
+  <section class="screen" id="s-quiz">
+    <div class="bar"><i id="bar"></i></div>
+    <div class="qtop">
+      <button id="back" onclick="back()">‹ 上一题</button>
+      <span id="count"></span>
+    </div>
+    <div class="qtitle" id="qtitle"></div>
+    <div id="opts"></div>
+  </section>
+
+  <section class="screen" id="s-loading">
+    <div class="loading">
+      <span class="spin" id="spin">🐑</span>
+      <p>正在分析你的共情类型…</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-result">
+    <div class="rcard" id="rcard"></div>
+    <p class="shot">📸 截图保存你的结果卡，发给朋友看看她是哪种</p>
+    <div id="rbody"></div>
+    <button class="btn ghost" onclick="restart()">重新测一次</button>
+    <p class="disclaimer">本测试是趣味性格测试，参考共情相关的心理学研究设计，用来帮你更了解自己，不是心理诊断。如果你长期情绪低落、已经影响到睡眠和生活，请找专业的心理咨询师或医生聊聊。</p>
+  </section>
+
+</div>
+
+<script>
+const TYPES = {
+  sheep: {
+    emoji: "🐑", name: "海绵小羊", kind: "情绪海绵型", color: "#e8836b", soft: "#fbe6df",
+    line: "别人的情绪，你都替他们过了一遍。",
+    tags: "#共情满格 #情绪天线 #晚上爱复盘",
+    portrait: "你的共情是「全频道接收」：朋友难过你跟着难过，同事被骂你跟着心慌，连刷到陌生人的故事都能难受一整天。大家都说你温柔、好说话，可只有你知道，晚上躺在床上，脑子里还在替别人重播白天的剧情。你不是想太多，是你的情绪天线太灵了，而且一直没有「下班」。",
+    power: "你能真正体会别人的痛。被你陪伴过的人，都会觉得自己被看见了。",
+    drain: "你常常分不清「这是她的情绪」还是「这是我的情绪」，很容易把别人的问题，背成自己的责任。",
+    tips: [
+      ["难受的时候，先问一句：这是谁的情绪？", "心理学把「替别人难受到自己受不了」叫做「个人痛苦」，它和真正的关心是两回事。分清楚了，你才能既关心别人，又不被拖垮。", "共情研究中的经典区分（Davis，1980）"],
+      ["给情绪起个名字", "试着说出来或写下来：「我现在是委屈 + 担心」。研究发现，用语言给情绪命名，能让大脑的情绪反应降下来。", "Lieberman 等，2007"],
+      ["从「我好痛」换成「我希望你好起来」", "神经科学家的研究发现：一直跟着别人一起痛，人容易耗竭；练习「希望对方好起来」的慈悲心，反而会让人更有力量。", "Singer & Klimecki，2014"]
+    ],
+    quote: "斯多葛学派的爱比克泰德说：有些事在我们的掌控之中，有些则不在。别人的情绪，是别人的功课。",
+    best: "🐘 守护大象：能稳稳接住你", careful: "🦌 雷达小鹿：两个人会一起想太多"
+  },
+  deer: {
+    emoji: "🦌", name: "雷达小鹿", kind: "察言观色型", color: "#c99a4e", soft: "#f6ecd9",
+    line: "房间里谁不开心，你进门三秒就知道。",
+    tags: "#高精度雷达 #已读不回会多想 #天生会照顾人",
+    portrait: "你的共情是「高精度雷达」：一个语气词、一次停顿、一条已读不回，你都能读出好几层意思。这让你在人群里特别会照顾人，也让你特别累，因为你的后台一直在运行「他是不是不高兴了」「我刚才那句话是不是不对」。别人说你情商高，你自己只想：好想关机。",
+    power: "你能读懂没说出口的话，是朋友里最会打圆场、最会照顾人的那一个。",
+    drain: "读得多，也猜得多。很多时候别人没想那么多，是你的雷达把小信号放大成了大警报。",
+    tips: [
+      ["猜之前，先问一句", "与其在心里猜十遍「她是不是生气了」，不如直接问：「你刚才是不是有点累？」验证一次，能省下一整晚的内耗。", ""],
+      ["给雷达定个下班时间", "比如晚上 10 点后不再复盘白天的对话。想到了就写在纸上，明天再看，大部分会发现没那么严重。", ""],
+      ["记一周「担心清单」", "把担心的事记下来，一周后看看真正发生了几件。多数人会发现，担心的事大部分都没发生。这是认知行为疗法里常用的小练习。", "认知行为疗法（CBT）常用练习"]
+    ],
+    quote: "社会学家戈夫曼说，每个人在日常生活里都有「前台」和「后台」。你看得见所有人的后台，也记得给自己留一个。",
+    best: "🦉 观察猫头鹰：帮你把猜测变成事实", careful: "🐑 海绵小羊：两个人会一起想太多"
+  },
+  elephant: {
+    emoji: "🐘", name: "守护大象", kind: "温柔稳定型", color: "#7f9fb8", soft: "#e4edf3",
+    line: "你是大家情绪的避风港，而且你站得很稳。",
+    tags: "#人形树洞 #情绪稳定 #靠谱担当",
+    portrait: "你能感受到别人的难过，但不会被卷走。朋友崩溃时第一个想到你，因为你既懂她，又不会跟着一起慌。你的共情里有一种「稳」：先接住，再陪着，最后还能帮一把。这是很多人学了很久都学不会的能力。",
+    power: "情绪稳定的温柔，是最稀缺的。你让身边的人觉得安全。",
+    drain: "因为你稳，大家都默认你不需要被照顾。你的委屈常常「自己慢慢消化」，久了也会累。",
+    tips: [
+      ["每周留一段「不当树洞」的时间", "手机静音，只照顾你自己。你不是 24 小时营业的客服。", ""],
+      ["练习说：「我今天状态不好，晚点陪你聊」", "拒绝一次，不会让你变成坏人。真正在乎你的人，会等你。", ""],
+      ["找一个能接住你的人", "稳的人也需要被接住。把你的烦恼，讲给一个你信任的人听。", ""]
+    ],
+    quote: "弗洛姆在《爱的艺术》里说，给予是一种力量的表现。别忘了，力量也需要补给。",
+    best: "🐑 海绵小羊 / 🦔 慢热刺猬：你给的安全感，他们最需要", careful: "一直只付出、从不开口的自己"
+  },
+  owl: {
+    emoji: "🦉", name: "观察猫头鹰", kind: "理性理解型", color: "#8a7bb0", soft: "#ebe7f4",
+    line: "你懂别人，只是不会跟着一起掉眼泪。",
+    tags: "#军师担当 #冷静但不冷漠 #解决方案型关心",
+    portrait: "你的共情是「理解型」：你很会站在别人的角度想问题，看得清一件事里每个人的处境。但你表达关心的方式，常常是帮分析、给建议，而不是陪着哭，所以偶尔会被说「你好冷静」「你是不是不在乎」。其实你很在乎，只是你的在乎，长得比较像解决方案。",
+    power: "你是最好的军师。情绪风暴里，你能保持清醒，帮别人看清方向。",
+    drain: "被误解。别人有时只想听一句「我懂你」，而你已经在给第三条建议了。",
+    tips: [
+      ["先共情，再建议", "开口前先说一句「这事换谁都会难受」，再给建议，对方会更听得进去。", ""],
+      ["问一句：你想要我听，还是想要我出主意？", "一句话，能解决八成的误会。", ""],
+      ["允许自己也有情绪", "理性不代表没有感受。你的难过，也值得被认真对待。", ""]
+    ],
+    quote: "斯宾诺莎说：「不要哭，不要笑，而要理解。」你天生就做得到，也记得偶尔让自己哭一下、笑一下。",
+    best: "🦌 雷达小鹿：你们一个会感受、一个会分析", careful: "🐑 海绵小羊：她要的是陪伴，你给的是方案"
+  },
+  hedgehog: {
+    emoji: "🦔", name: "慢热刺猬", kind: "自我保护型", color: "#6f9e86", soft: "#e2efe8",
+    line: "不是你不在乎，是你在乎得太用力，只好先把刺竖起来。",
+    tags: "#慢热 #外冷内热 #熟了超好",
+    portrait: "你其实很敏感，别人的情绪你都接收得到，只是接收太多会招架不住，所以你学会了先关门、先划走、先装作没事。熟悉的人知道你超级温柔，不熟的人觉得你有点冷。你的刺不是用来攻击的，是用来保护的。",
+    power: "你懂分寸，也很会保护自己的能量。一旦认定一个人，就是长长久久。",
+    drain: "把情绪关在门外，不等于它消失了。憋得太久，会在某个时刻一起爆发。",
+    tips: [
+      ["小剂量地打开自己", "不用一下子掏心掏肺。每次多分享一点点真实感受，就很好。", ""],
+      ["用写的，代替说的", "心理学家彭尼贝克的研究发现：连续几天、每天花十几分钟把心事写下来，对身心都有帮助。", "Pennebaker 表达性写作研究"],
+      ["给你的「关机」解释一句", "跟熟人说清楚：「我需要一个人待一会儿，不是在生你的气。」误会会少很多。", ""]
+    ],
+    quote: "叔本华讲过「刺猬的两难」：靠得太近会刺痛，离得太远会寒冷。找到那个刚刚好的距离，就是你的智慧。",
+    best: "🐘 守护大象：有耐心等你慢慢靠近", careful: "🦌 雷达小鹿：被一眼看穿，会让你想逃"
+  }
+};
+
+const ORDER = ["sheep", "deer", "hedgehog", "elephant", "owl"]; // 同分时优先
+
+const QS = [
+  ["朋友深夜给你发了一句「睡了吗」，你的第一反应是？", [
+    ["心一紧：她是不是出什么事了？马上回", "sheep"],
+    ["先翻翻她最近的朋友圈，猜猜她怎么了", "deer"],
+    ["「还没呢，怎么啦？」然后准备好听她说", "elephant"],
+    ["等她说具体什么事，再想怎么回", "owl"]]],
+  ["看电影看到主角哭的片段，你通常……", [
+    ["哭得比主角还惨，出了影院还缓不过来", "sheep"],
+    ["会被打动，但看完就能出戏", "elephant"],
+    ["更好奇编剧是怎么让人哭出来的", "owl"],
+    ["眼眶一热就赶紧转移注意力，不想当众哭", "hedgehog"]]],
+  ["开会时，领导的脸色突然变了，你会？", [
+    ["第一个察觉到，然后整场都在观察大家的反应", "deer"],
+    ["开始担心：是不是我哪里做错了", "sheep"],
+    ["注意到了，但先专心把自己的部分讲完", "owl"],
+    ["默默缩小存在感，少说为妙", "hedgehog"]]],
+  ["同事跟你吐槽了半小时，结束后你的状态是？", [
+    ["像被抽干了，晚上回家还在替她生气", "sheep"],
+    ["有点累，但看她好点了就觉得值", "elephant"],
+    ["脑子里已经帮她列好了三个解决方案", "owl"],
+    ["下次看到她走过来，会有点想躲", "hedgehog"]]],
+  ["朋友说「你好懂我」，你心里想的是？", [
+    ["「因为你的每个表情我都在看啊」", "deer"],
+    ["「懂你是应该的，你开心就好」", "elephant"],
+    ["「其实是因为我也经历过同样的痛」", "sheep"],
+    ["「被需要好开心，但也有点压力」", "hedgehog"]]],
+  ["聚会上有个人一直插不上话，你会？", [
+    ["早就注意到了，找机会把话题抛给她", "deer"],
+    ["干脆坐过去，单独陪她聊", "elephant"],
+    ["看到了，但觉得她可能就是喜欢安静", "owl"],
+    ["替她尴尬到脚趾抠地", "sheep"]]],
+  ["下面哪句话，你最怕听到？", [
+    ["「你是不是不高兴了？」", "hedgehog"],
+    ["「没事，你不用管我」", "deer"],
+    ["「你想太多了」", "sheep"],
+    ["「你怎么这么冷静？」", "owl"]]],
+  ["和亲近的人吵架之后，你通常……", [
+    ["反复回放每一句话，猜对方到底什么意思", "deer"],
+    ["先冷静下来，想清楚对方真正在意的是什么", "owl"],
+    ["先低头和好，自己的委屈慢慢消化", "elephant"],
+    ["把自己关起来，谁也不想见", "hedgehog"]]],
+  ["刷到别人很惨的经历，你会？", [
+    ["难受一整天，甚至影响睡觉", "sheep"],
+    ["心疼，然后看看能不能帮上忙", "elephant"],
+    ["先去查查全貌，看是不是真的", "owl"],
+    ["赶紧划走，不敢看", "hedgehog"]]],
+  ["在朋友圈子里，你更像哪个角色？", [
+    ["情绪树洞，大家有事都找你", "elephant"],
+    ["气氛雷达，谁不对劲你第一个知道", "deer"],
+    ["军师，理性分析担当", "owl"],
+    ["慢热的那个，熟了才会掏心", "hedgehog"]]],
+  ["社交了一整天回到家，你最需要的是？", [
+    ["一个人待着，把今天每个人的反应再过一遍", "deer"],
+    ["找个人倒一倒今天吸收的坏情绪", "sheep"],
+    ["洗个热水澡，立刻满血", "elephant"],
+    ["关掉手机，谁的消息都先不回", "hedgehog"]]],
+  ["如果可以选一种超能力，你选？", [
+    ["关掉别人情绪的开关", "hedgehog"],
+    ["读心术", "deer"],
+    ["治愈别人", "elephant"],
+    ["时间暂停，让我想清楚再回应", "owl"]]]
+];
+
+let idx = 0;
+let answers = [];
+
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+  window.scrollTo(0, 0);
+}
+
+function start() { idx = 0; answers = []; render(); show("s-quiz"); }
+
+function render() {
+  const [title, opts] = QS[idx];
+  document.getElementById("bar").style.width = (idx / QS.length * 100) + "%";
+  document.getElementById("count").textContent = (idx + 1) + " / " + QS.length;
+  document.getElementById("back").disabled = idx === 0;
+  document.getElementById("qtitle").textContent = title;
+  const box = document.getElementById("opts");
+  box.innerHTML = "";
+  opts.forEach(([text, type]) => {
+    const b = document.createElement("button");
+    b.className = "opt" + (answers[idx] === type ? " picked" : "");
+    b.textContent = text;
+    b.onclick = () => pick(type, b);
+    box.appendChild(b);
+  });
+}
+
+function pick(type, el) {
+  answers[idx] = type;
+  el.classList.add("picked");
+  setTimeout(() => {
+    if (idx < QS.length - 1) { idx++; render(); }
+    else finish();
+  }, 220);
+}
+
+function back() { if (idx > 0) { idx--; render(); } }
+
+function finish() {
+  document.getElementById("bar").style.width = "100%";
+  show("s-loading");
+  const spin = document.getElementById("spin");
+  let k = 0;
+  const t = setInterval(() => { spin.textContent = TYPES[ORDER[k++ % 5]].emoji; }, 260);
+  setTimeout(() => { clearInterval(t); result(); }, 1800);
+}
+
+function result() {
+  const score = {};
+  ORDER.forEach(k => score[k] = 0);
+  answers.forEach(t => score[t]++);
+  const top = ORDER.reduce((a, b) => score[b] > score[a] ? b : a);
+  const T = TYPES[top];
+  document.documentElement.style.setProperty("--accent", T.color);
+  document.documentElement.style.setProperty("--accent-soft", T.soft);
+
+  document.getElementById("rcard").innerHTML = `
+    <div class="tag">我的共情小动物是</div>
+    <div class="big">${T.emoji}</div>
+    <h2>${T.name}</h2>
+    <span class="type" style="background:${T.soft};color:${T.color}">${T.kind}</span>
+    <div class="line1">${T.line}</div>
+    <div class="tags">${T.tags}</div>
+    <div class="brand">共情小动物测试</div>`;
+
+  const dist = ORDER.slice().sort((a, b) => score[b] - score[a]).map(k => {
+    const pc = Math.round(score[k] / QS.length * 100);
+    return `<div class="row"><span class="nm">${TYPES[k].emoji} ${TYPES[k].name.slice(-2)}</span>
+      <span class="tr"><i style="width:${pc}%;background:${TYPES[k].color}"></i></span>
+      <span class="pc">${pc}%</span></div>`;
+  }).join("");
+
+  const tips = T.tips.map(([h, p, s]) =>
+    `<li><b>${h}</b>${p}${s ? `<span class="src">参考：${s}</span>` : ""}</li>`).join("");
+
+  document.getElementById("rbody").innerHTML = `
+    <div class="sec"><h3>你的共情画像</h3><p>${T.portrait}</p></div>
+    <div class="sec dist"><h3>你的共情成分</h3>${dist}</div>
+    <div class="sec"><h3>✨ 你的超能力</h3><p>${T.power}</p></div>
+    <div class="sec"><h3>🔋 最消耗你的地方</h3><p>${T.drain}</p></div>
+    <div class="sec"><h3>给你的 3 个小方法</h3><ol>${tips}</ol></div>
+    <div class="sec"><h3>送你一句话</h3><p class="quote">${T.quote}</p></div>
+    <div class="sec"><h3>和其他小动物</h3><div class="pair">
+      <div><b>最佳搭档</b>${T.best}</div>
+      <div><b>相处要小心</b>${T.careful}</div></div></div>`;
+  show("s-result");
+}
+
+function restart() {
+  document.documentElement.style.removeProperty("--accent");
+  document.documentElement.style.removeProperty("--accent-soft");
+  show("s-intro");
+}
+</script>
+</body>
+</html>
